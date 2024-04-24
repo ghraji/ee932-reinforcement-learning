@@ -1,0 +1,101 @@
+# Required Libraries
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+
+# Parameters
+num_experiments = 500
+T = 10000
+K = 2
+delta = 1/4
+delta_values = [0.05, 0.1, 0.2, 0.3, 0.4, 0.45]
+
+
+
+## Solution for Q1 ##
+
+    
+# Initialize lists to store results
+average_regrets_ucb = []
+ucb_values = []
+counts = 0
+bonus = 0
+
+# UCB constant
+c_ucb = np.sqrt(3/2)
+
+for delta in delta_values:
+    total_regrets_ucb = []
+
+    for _ in range(num_experiments):
+        # Generate true means based on given values and arms
+        mu0 = 0.5
+        mu1 = 0.5 + delta
+
+        # Initialize UCB algorithm parameters
+        empirical_means = np.zeros(K)
+        arm_counts = np.ones(K)  # Explore each arm once
+        total_regret_ucb = 0
+
+        # Run UCB algorithm after exploring each arm once
+        for t in range(K + 1, T + 1):
+
+            # Calculate UCB for each arm
+            # write your code here
+            # [Hint] create and update a ucb_values numpy array same as the size of emperical_means
+            # ucb_values = ?
+            
+            # bonus = (np.sqrt((2 * np.log(T)) / float(arm_counts[t])))
+            # bonus = (np.sqrt((2 * np.log(T)) / (arm_counts[t])))
+            bonus = (np.sqrt((2 * np.log(T)) / (arm_counts)))
+            
+            ucb_values = empirical_means + bonus
+            
+
+            # Choose the arm with the highest UCB calculated above
+            # write your code here
+            # Commit to the arm with the highest empirical mean
+            # store the chosen arm in the variable chosen_arm
+            # this will be 0 if Arm 1 is chosen and 1 if Arm 2 is chosen
+            # chosen_arm = ?
+            chosen_arm = np.argmax(ucb_values)
+            # Observe the reward from the environment for the chosen arm
+            reward = np.random.binomial(1, mu0 if chosen_arm == 0 else mu1)
+
+            # Update arm_counts and empirical_means for the chosen_arm
+            # write your code here
+            # arm_counts[chosen_arm] = ?
+            # empirical_means[chosen_arm] = ?
+            # Update arm_counts and empirical_means for the chosen_arm
+            arm_counts[chosen_arm] += 1
+            empirical_means[chosen_arm] = (empirical_means[chosen_arm] * (arm_counts[chosen_arm] - 1) + reward) / arm_counts[chosen_arm]
+
+            # Update total regret
+            # write your code here
+            # update the variable total_regret_ucb
+            # total_regret_ucb = ?
+            total_regret_ucb += mu1 - reward
+
+        # Record total regret for this experiment
+        total_regrets_ucb.append(total_regret_ucb)
+
+    # Calculate average regret for this delta
+    average_regret_ucb = np.mean(total_regrets_ucb)
+    average_regrets_ucb.append(average_regret_ucb)
+
+# print result
+print(average_regrets_ucb)
+
+
+
+# Plotting
+plt.plot(delta_values, average_regrets_ucb, marker='o',label = 'UCB Regret')
+plt.xlabel('Delta')
+plt.ylabel('Estimated Regret')
+plt.title('Estimated Regret as a Function of Delta')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
